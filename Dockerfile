@@ -1,13 +1,17 @@
 # Etapa 1: Construcción (Build)
-FROM node:18-slim AS builder
+# Usar node:18-alpine en lugar de slim para tener soporte nativo de compilación
+FROM node:18-alpine AS builder
+
+# Instalar dependencias del sistema necesarias para bindings nativos (tailwindcss/oxide)
+RUN apk add --no-cache python3 make g++ libc6-compat
 
 WORKDIR /app
 
 # Copiar archivos de dependencias
-COPY package.json package-lock.json* yarn.lock* pnpm-lock.yaml* ./
+COPY package.json package-lock.json* ./
 
-# Instalar dependencias (usamos npm ci si existe package-lock, sino npm install)
-RUN npm install
+# Limpiar caché e instalar desde cero para compilar bindings nativos en Linux
+RUN npm cache clean --force && npm install
 
 # Copiar el resto del código del proyecto
 COPY . .
