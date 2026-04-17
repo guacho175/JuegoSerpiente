@@ -136,6 +136,7 @@ export default function NeonSnake({ onGameOver, onReset, onStart }: Props) {
   const [isPaused,    setIsPaused]    = useState(false);
   const [playerName,  setPlayerName]  = useState('');
   const [hasSaved,    setHasSaved]    = useState(false);
+  const [isSaving,    setIsSaving]    = useState(false);
   const [showLevelUp, setShowLevelUp] = useState(false);
 
   // ── Refs that shadow state (safe inside setInterval / rAF)
@@ -429,14 +430,34 @@ export default function NeonSnake({ onGameOver, onReset, onStart }: Props) {
     if (onStart) onStart();
   };
 
-  const saveScore = (e?: React.FormEvent) => {
+  const saveScore = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!playerName.trim()) return;
-    const entry: ScoreEntry = { name: playerName.trim(), score, date: new Date().toLocaleDateString() };
+    if (!playerName.trim() || isSaving) return;
+    
+    setIsSaving(true);
+    const entry = { name: playerName.trim(), score, difficulty: lv.name, date: new Date().toLocaleDateString() };
+    
+    // Save to SheetDB if URL exists
+    const sheetUrl = import.meta.env.VITE_SHEETDB_URL;
+    if (sheetUrl) {
+      try {
+        await fetch(sheetUrl, {
+          method: 'POST',
+          headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+          body: JSON.stringify({ data: [entry] })
+        });
+      } catch (err) {
+        console.error('Error saving to SheetDB:', err);
+      }
+    }
+
+    // Save to localStorage as well (fallback & immediate update)
     const prev = JSON.parse(localStorage.getItem('ritmo_neon_ranking') || '[]') as ScoreEntry[];
     const next = [...prev, entry].sort((a, b) => b.score - a.score).slice(0, 10);
     localStorage.setItem('ritmo_neon_ranking', JSON.stringify(next));
+
     setHasSaved(true);
+    setIsSaving(false);
     window.dispatchEvent(new Event('rankingUpdated'));
   };
 
@@ -583,12 +604,16 @@ export default function NeonSnake({ onGameOver, onReset, onStart }: Props) {
                                      text-slate-100 placeholder:text-slate-600 font-mono uppercase text-xs focus:outline-none transition-colors"
                           maxLength={10} autoFocus />
                       </div>
-                      <button type="submit" disabled={!playerName.trim()}
+                      <button type="submit" disabled={!playerName.trim() || isSaving}
                         className="w-full flex items-center justify-center gap-2 py-2 font-bold uppercase
                                    tracking-widest rounded-lg text-xs text-white transition-all
                                    disabled:opacity-40 disabled:cursor-not-allowed"
                         style={{ background: '#f43f5e' }}>
-                        <Save className="w-3.5 h-3.5" /> Guardar en Ranking
+                        {isSaving ? (
+                          <span className="animate-pulse">Guardando...</span>
+                        ) : (
+                          <><Save className="w-3.5 h-3.5" /> Guardar en Ranking</>
+                        )}
                       </button>
                     </form>
                   ) : (

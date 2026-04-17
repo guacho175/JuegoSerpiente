@@ -7,6 +7,7 @@ import { ListOrdered } from 'lucide-react';
 interface ScoreEntry {
   name: string;
   score: number;
+  difficulty?: string;
   date: string;
 }
 
@@ -14,12 +15,40 @@ export default function App() {
   const [playLoseTrack, setPlayLoseTrack] = useState(false);
   const [isGameStarted, setIsGameStarted] = useState(false);
   const [ranking, setRanking] = useState<ScoreEntry[]>([]);
+  const [isLoadingRanking, setIsLoadingRanking] = useState(false);
 
   useEffect(() => {
-    const loadRanking = () => {
+    const loadRanking = async () => {
+      const sheetUrl = import.meta.env.VITE_SHEETDB_URL;
+      setIsLoadingRanking(true);
+      
+      if (sheetUrl) {
+        try {
+          const res = await fetch(sheetUrl);
+          if (res.ok) {
+            const data: any[] = await res.json();
+            const parsed: ScoreEntry[] = data.map(row => ({
+              name: String(row.name || 'ANON'),
+              score: parseInt(row.score, 10) || 0,
+              difficulty: String(row.difficulty || ''),
+              date: String(row.date || '')
+            }));
+            const sorted = parsed.sort((a, b) => b.score - a.score).slice(0, 10);
+            setRanking(sorted);
+            setIsLoadingRanking(false);
+            return;
+          }
+        } catch (error) {
+          console.error("Fallo conectando a SheetDB, usando respaldo local:", error);
+        }
+      }
+      
+      // Fallback a localStorage
       const saved = JSON.parse(localStorage.getItem('ritmo_neon_ranking') || '[]');
       setRanking(saved);
+      setIsLoadingRanking(false);
     };
+    
     loadRanking();
     window.addEventListener('rankingUpdated', loadRanking);
     return () => window.removeEventListener('rankingUpdated', loadRanking);
@@ -67,23 +96,34 @@ export default function App() {
           </div>
 
           <div className="flex-1 space-y-1.5 overflow-y-auto pr-1">
-            {ranking.length > 0 ? (
+            {isLoadingRanking ? (
+              <div className="flex flex-col items-center justify-center py-4">
+                <p className="text-[8px] font-mono text-cyan-400 uppercase tracking-widest animate-pulse">Sincronizando...</p>
+              </div>
+            ) : ranking.length > 0 ? (
               ranking.map((entry, index) => (
                 <div
                   key={index}
-                  className="group flex items-center justify-between p-1 bg-slate-800/20 border border-slate-700/30 rounded hover:border-magenta-500/50 transition-all"
+                  className="group flex flex-col p-1 bg-slate-800/20 border border-slate-700/30 rounded hover:border-magenta-500/50 transition-all"
                 >
-                  <div className="flex items-center gap-1">
-                    <span className={`font-mono font-black italic text-[10px] ${index < 3 ? 'text-cyan-400' : 'text-slate-600'}`}>
-                      {index + 1}
-                    </span>
-                    <div className="min-w-0">
-                      <p className="text-[8px] sm:text-[9px] font-bold text-slate-100 uppercase truncate max-w-[50px] sm:max-w-[70px]">{entry.name}</p>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1">
+                      <span className={`font-mono font-black italic text-[10px] ${index < 3 ? 'text-cyan-400' : 'text-slate-600'}`}>
+                        {index + 1}
+                      </span>
+                      <div className="min-w-0">
+                        <p className="text-[8px] sm:text-[9px] font-bold text-slate-100 uppercase truncate max-w-[50px] sm:max-w-[70px]">{entry.name}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-[9px] sm:text-[10px] font-black text-magenta-500 leading-none">{entry.score}</p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-[9px] sm:text-[10px] font-black text-magenta-500 leading-none">{entry.score}</p>
-                  </div>
+                  {entry.difficulty && (
+                    <div className="flex justify-start ml-3">
+                      <p className="text-[6px] sm:text-[7px] text-slate-500 uppercase tracking-wider">{entry.difficulty}</p>
+                    </div>
+                  )}
                 </div>
               ))
             ) : (
