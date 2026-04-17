@@ -24,7 +24,7 @@ export default function App() {
       
       if (sheetUrl) {
         try {
-          const res = await fetch(sheetUrl);
+          const res = await fetch(sheetUrl, { cache: 'no-store' });
           if (res.ok) {
             const data: any[] = await res.json();
             const parsed: ScoreEntry[] = data.map(row => ({
