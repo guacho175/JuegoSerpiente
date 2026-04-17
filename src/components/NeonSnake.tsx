@@ -290,11 +290,46 @@ export default function NeonSnake({ onGameOver, onReset, onStart }: Props) {
       if (score >= LEVELS[i].threshold) { newIdx = i; break; }
     }
     if (newIdx > levelIdx) {
-      // Safe obstacles: skip cells currently occupied by snake
-      const raw      = LEVELS[newIdx].obstacles;
+      // Create random obstacles for this new level
+      const randomObsCount = newIdx * 5; // e.g., 5 blocks for Nivel 2, 10 for Nivel 3...
+      const newRandomObs: Pt[] = [];
+      
+      for (let i = 0; i < randomObsCount; i++) {
+        let attempts = 0;
+        let rx = 0, ry = 0;
+        let valid = false;
+        while (!valid && attempts < 50) {
+          rx = Math.floor(Math.random() * (GRID - 2)) + 1; // avoid extreme edges
+          ry = Math.floor(Math.random() * (GRID - 2)) + 1;
+          
+          // distance to snake head
+          const head = snakeR.current[0];
+          const distToHead = Math.abs(head.x - rx) + Math.abs(head.y - ry);
+          
+          valid = true;
+          // Don't spawn too close to head
+          if (distToHead < 4) valid = false;
+          // Don't spawn on snake
+          if (snakeR.current.some(s => s.x === rx && s.y === ry)) valid = false;
+          // Don't spawn on foods
+          if (foodsR.current.some(f => f.x === rx && f.y === ry)) valid = false;
+          
+          attempts++;
+        }
+        if (valid) newRandomObs.push({ x: rx, y: ry });
+      }
+
+      // Merge base level obstacles, existing obstacles, and new random ones
+      const combinedRaw = [...LEVELS[newIdx].obstacles, ...obsR.current, ...newRandomObs];
+      // Keep only unique
+      const raw = combinedRaw.filter((v, i, a) => a.findIndex(t => t.x === v.x && t.y === v.y) === i);
+
+      // Safe obstacles: double check no collision with snake body
       const safeObs  = raw.filter(o => !snakeR.current.some(s => s.x === o.x && s.y === o.y));
+      
       setLevelIdx(newIdx);
       setObstacles(safeObs);
+      // Ensure foods are not superimposed on safeObs
       setFoods(makeFoods(FOOD, snakeR.current, safeObs));
       setShowLevelUp(true);
       setTimeout(() => setShowLevelUp(false), 2200);
@@ -378,8 +413,8 @@ export default function NeonSnake({ onGameOver, onReset, onStart }: Props) {
       const newDir = map[e.code];
       if (newDir) setDirection(newDir);
     };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    window.addEventListener('keydown', onKey, { capture: true, passive: false });
+    return () => window.removeEventListener('keydown', onKey, { capture: true });
   }, []);
 
   /* ── START / RESET ────────────────────── */
