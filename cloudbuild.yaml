@@ -3,11 +3,11 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args: ['build', '-t', 'gcr.io/$PROJECT_ID/juego-serpiente:$COMMIT_SHA', '.']
 
-  # 2. Subir la imagen a Container Registry (o Artifact Registry si lo configuras)
+  # 2. Subir la imagen a Container Registry
   - name: 'gcr.io/cloud-builders/docker'
     args: ['push', 'gcr.io/$PROJECT_ID/juego-serpiente:$COMMIT_SHA']
 
-  # 3. Desplegar en Cloud Run
+  # 3. Desplegar en Cloud Run con configuración de bajo consumo
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     entrypoint: gcloud
     args:
@@ -17,12 +17,26 @@ steps:
       - '--image'
       - 'gcr.io/$PROJECT_ID/juego-serpiente:$COMMIT_SHA'
       - '--region'
-      - 'us-central1' # Cambia esto a tu región preferida si es diferente
+      - 'us-central1'
       - '--platform'
       - 'managed'
       - '--allow-unauthenticated'
       - '--port'
       - '8080'
+      # --- Configuración de bajo consumo ---
+      - '--min-instances'
+      - '0'            # Escala a CERO cuando no hay tráfico (no pagas nada)
+      - '--max-instances'
+      - '2'            # Máximo 2 instancias simultáneas (evita escalar de más)
+      - '--memory'
+      - '256Mi'        # 256MB de RAM es suficiente para Nginx + archivos estáticos
+      - '--cpu'
+      - '1'            # 1 vCPU
+      - '--concurrency'
+      - '80'           # Hasta 80 requests por instancia antes de escalar
+      - '--timeout'
+      - '30'           # Timeout de 30s por request (suficiente para archivos estáticos)
+      - '--cpu-throttling' # CPU solo activa durante requests (no en idle)
 
 images:
   - 'gcr.io/$PROJECT_ID/juego-serpiente:$COMMIT_SHA'
