@@ -357,6 +357,10 @@ export default function NeonSnake({ onGameOver, onReset, onStart }: Props) {
   /* ── KEYBOARD ─────────────────────────── */
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      // Siempre bloquear scroll de flechas cuando el juego está activo
+      const arrowKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'];
+      if (arrowKeys.includes(e.code)) e.preventDefault();
+
       if (!startedR.current || goR.current) return;
       if (['Space', 'KeyP'].includes(e.code)) { setIsPaused(p => !p); return; }
       if (pausedR.current) return;
