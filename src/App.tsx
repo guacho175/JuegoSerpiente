@@ -53,13 +53,13 @@ export default function App() {
       </motion.header>
 
       {/* Main Content — fills remaining height, no scroll */}
-      <div className="flex-1 flex flex-col lg:flex-row w-full z-10 relative min-h-0">
+      <div className="flex-1 flex flex-col w-full z-10 relative min-h-0">
         {/* Ranking Sidebar */}
         <motion.aside
           initial={{ x: -50, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ delay: 0.3 }}
-          className="w-full lg:w-44 xl:w-52 p-2 sm:p-3 lg:border-r border-slate-800 bg-slate-900/30 backdrop-blur-md order-2 lg:order-1 flex flex-col flex-shrink-0"
+          className="w-full lg:absolute lg:left-0 lg:top-0 lg:bottom-0 z-20 lg:w-44 xl:w-52 p-2 sm:p-3 lg:border-r border-t lg:border-t-0 border-slate-800 bg-slate-900/40 backdrop-blur-xl flex flex-col flex-shrink-0"
         >
           <div className="flex items-center gap-2 mb-2">
             <ListOrdered className="w-3.5 h-3.5 text-magenta-500" />
@@ -95,7 +95,7 @@ export default function App() {
         </motion.aside>
 
         {/* Game Area */}
-        <main className="flex-1 flex flex-col items-center justify-center p-1 sm:p-2 lg:p-4 order-1 lg:order-2 overflow-hidden relative bg-[radial-gradient(#1e1e24_1px,transparent_1px)] [background-size:40px_40px]">
+        <main className="flex-1 flex flex-col items-center justify-center w-full h-full p-1 sm:p-2 lg:p-4 overflow-hidden relative bg-[radial-gradient(#1e1e24_1px,transparent_1px)] [background-size:40px_40px]">
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}

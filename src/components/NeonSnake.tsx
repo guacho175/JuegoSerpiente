@@ -355,7 +355,6 @@ export default function NeonSnake({ onGameOver, onReset, onStart }: Props) {
 
       if (nx < 0 || nx >= GRID || ny < 0 || ny >= GRID) return die();
       if (obsR.current.some(o => o.x === nx && o.y === ny))  return die();
-      if (cur.some(s => s.x === nx && s.y === ny))           return die();
 
       const newHead = { x: nx, y: ny };
       const newSnake = [newHead, ...cur];
@@ -383,11 +382,11 @@ export default function NeonSnake({ onGameOver, onReset, onStart }: Props) {
   /* ── GAME LOOP INTERVAL ───────────────── */
   useEffect(() => {
     if (loopRef.current) clearInterval(loopRef.current);
-    if (gameStarted && !gameOver && !isPaused) {
+    if (gameStarted && !gameOver && !isPaused && !showLevelUp) {
       loopRef.current = setInterval(moveSnake, LEVELS[levelIdx].speed);
     }
     return () => { if (loopRef.current) clearInterval(loopRef.current); };
-  }, [gameStarted, gameOver, isPaused, moveSnake, levelIdx]);
+  }, [gameStarted, gameOver, isPaused, showLevelUp, moveSnake, levelIdx]);
 
   /* ── KEYBOARD ─────────────────────────── */
   useEffect(() => {
