@@ -417,6 +417,59 @@ export default function NeonSnake({ onGameOver, onReset, onStart }: Props) {
     return () => window.removeEventListener('keydown', onKey, { capture: true });
   }, []);
 
+  /* ── SWIPE GESTURES ON CANVAS ────────── */
+  useEffect(() => {
+    const cv = canvasRef.current;
+    if (!cv) return;
+
+    let startX = 0;
+    let startY = 0;
+    let swiping = false;
+    const THRESHOLD = 30;
+
+    const onTouchStart = (e: TouchEvent) => {
+      const t = e.touches[0];
+      startX = t.clientX;
+      startY = t.clientY;
+      swiping = true;
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      e.preventDefault();
+    };
+
+    const onTouchEnd = (e: TouchEvent) => {
+      if (!swiping) return;
+      swiping = false;
+      if (!startedR.current || goR.current || pausedR.current) return;
+
+      const t = e.changedTouches[0];
+      const dx = t.clientX - startX;
+      const dy = t.clientY - startY;
+
+      if (Math.abs(dx) < THRESHOLD && Math.abs(dy) < THRESHOLD) return;
+
+      const d = dirR.current;
+      if (Math.abs(dx) > Math.abs(dy)) {
+        if (dx > 0 && d.x !== -1) setDirection({ x: 1, y: 0 });
+        else if (dx < 0 && d.x !== 1) setDirection({ x: -1, y: 0 });
+      } else {
+        if (dy > 0 && d.y !== -1) setDirection({ x: 0, y: 1 });
+        else if (dy < 0 && d.y !== 1) setDirection({ x: 0, y: -1 });
+      }
+    };
+
+    cv.addEventListener('touchstart', onTouchStart, { passive: true });
+    cv.addEventListener('touchmove', onTouchMove, { passive: false });
+    cv.addEventListener('touchend', onTouchEnd, { passive: true });
+
+    return () => {
+      cv.removeEventListener('touchstart', onTouchStart);
+      cv.removeEventListener('touchmove', onTouchMove);
+      cv.removeEventListener('touchend', onTouchEnd);
+    };
+  }, []);
+
   /* ── START / RESET ────────────────────── */
   const startGame = () => {
     const sn  = INIT_SNAKE;
@@ -513,7 +566,7 @@ export default function NeonSnake({ onGameOver, onReset, onStart }: Props) {
       </div>
 
       {/* Canvas container */}
-      <div className="relative w-full max-w-[min(90vw,min(82vh,520px))] aspect-square rounded-2xl overflow-hidden"
+      <div className="relative w-full max-w-[min(90vw,min(52dvh,520px))] sm:max-w-[min(90vw,min(82vh,520px))] aspect-square rounded-2xl overflow-hidden"
         style={{
           boxShadow: `0 0 50px ${lv.snake}22, 0 0 100px ${lv.snake}0a, inset 0 0 0 1px ${lv.snake}33`,
         }}>
@@ -656,7 +709,8 @@ export default function NeonSnake({ onGameOver, onReset, onStart }: Props) {
                   </button>
 
                   <p className="text-[9px] font-mono text-slate-600 uppercase tracking-widest">
-                    ↑ ↓ ← → o WASD · espacio para pausar
+                    <span className="hidden sm:inline">↑ ↓ ← → o WASD · espacio para pausar</span>
+                    <span className="sm:hidden">Desliza o usa el pad · toca pausa</span>
                   </p>
 
                   {/* Level dots */}

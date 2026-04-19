@@ -37,4 +37,11 @@ html, body {
   @apply bg-[#0c0c0e] text-slate-100 antialiased;
   overflow: hidden !important;
   touch-action: none !important;
+  overscroll-behavior: none;
+}
+
+canvas {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
