@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import NeonSnake from './components/NeonSnake';
 import NeonMusicPlayer from './components/NeonMusicPlayer';
 import { motion } from 'motion/react';
-import { ListOrdered, ChevronDown, ChevronUp } from 'lucide-react';
+import { ListOrdered } from 'lucide-react';
 
 interface ScoreEntry {
   name: string;
@@ -16,7 +16,6 @@ export default function App() {
   const [isGameStarted, setIsGameStarted] = useState(false);
   const [ranking, setRanking] = useState<ScoreEntry[]>([]);
   const [isLoadingRanking, setIsLoadingRanking] = useState(false);
-  const [rankingOpen, setRankingOpen] = useState(false);
 
   useEffect(() => {
     const loadRanking = async () => {
@@ -91,20 +90,12 @@ export default function App() {
           transition={{ delay: 0.3 }}
           className="w-full lg:absolute lg:left-0 lg:top-0 lg:bottom-0 z-20 lg:w-44 xl:w-52 p-2 sm:p-3 lg:border-r border-t lg:border-t-0 border-slate-800 bg-slate-900/40 backdrop-blur-xl flex flex-col flex-shrink-0"
         >
-          <button
-            onClick={() => setRankingOpen(o => !o)}
-            className="flex items-center gap-2 mb-2 lg:pointer-events-none w-full"
-          >
+          <div className="flex items-center gap-2 mb-2">
             <ListOrdered className="w-3.5 h-3.5 text-magenta-500" />
             <h2 className="text-[10px] sm:text-xs font-bold text-slate-100 uppercase tracking-widest italic">Ranking</h2>
-            <span className="lg:hidden ml-auto text-slate-500">
-              {rankingOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-            </span>
-          </button>
+          </div>
 
-          <div className={`flex-1 space-y-1.5 overflow-y-auto pr-1 transition-all duration-300
-            ${rankingOpen ? 'max-h-[140px] opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}
-            lg:max-h-none lg:opacity-100 lg:overflow-y-auto`}>
+          <div className="flex-1 space-y-1.5 overflow-y-auto pr-1 max-h-[90px] lg:max-h-none">
             {isLoadingRanking ? (
               <div className="flex flex-col items-center justify-center py-4">
                 <p className="text-[8px] font-mono text-cyan-400 uppercase tracking-widest animate-pulse">Sincronizando...</p>
