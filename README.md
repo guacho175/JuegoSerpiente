@@ -1,5 +1,5 @@
 <div align="center">
-  <img width="1200" height="300" src="https://media.istockphoto.com/id/1199341457/vector/neon-snake-game.jpg?s=612x612&w=0&k=20&c=6PZ_v-_8i2cMvK5T1A-n_0g1m0Y6n27E0G-R7vD8O-c=" alt="Ritmo Neón" style="border-radius: 12px;" />
+  <img width="100%" src="./banner.png" alt="Ritmo Neón Cyberpunk" style="border-radius: 12px; object-fit: cover;" />
   
   # 🐍 Ritmo Neón Serpiente
   
