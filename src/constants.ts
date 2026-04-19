@@ -7,7 +7,6 @@ export interface Track {
 }
 
 // Tracks lofi / ambient / chillwave - libres de copyright (Pixabay CDN)
-// Tracks lofi / ambient / chillwave - libres de copyright (Pixabay CDN)
 // Se han seleccionado variantes suaves, relajadas y no tan "eléctricas" a petición.
 export const DUMMY_TRACKS: Track[] = [
   {

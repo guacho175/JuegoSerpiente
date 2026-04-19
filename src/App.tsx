@@ -158,23 +158,16 @@ export default function App() {
         </main>
       </div>
 
-      {/* ── UNA SOLA instancia del player, compartida entre desktop y mobile ── */}
-      {/* Desktop: floating bottom-right */}
-      <div className="hidden sm:block fixed bottom-4 right-4 z-50 w-72 lg:w-80">
+      {/* ── Desktop & Mobile Music Player ── */}
+      <div className="w-full flex-shrink-0 bg-[#0c0c0e]/95 backdrop-blur-md border-t border-slate-900 z-50 sm:fixed sm:bottom-4 sm:right-4 sm:w-72 lg:w-80 sm:bg-transparent sm:backdrop-blur-none sm:border-none sm:flex-shrink">
         <motion.div
-          initial={{ x: 50, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{ delay: 0.4 }}
+           initial={{ opacity: 0, y: 20 }}
+           animate={{ opacity: 1, y: 0 }}
+           transition={{ delay: 0.4 }}
+           className="max-w-md mx-auto sm:max-w-none"
         >
           <NeonMusicPlayer playLoseTrack={playLoseTrack} isGameStarted={isGameStarted} />
         </motion.div>
-      </div>
-
-      {/* Mobile: strip at the bottom — in flow, not fixed */}
-      <div className="sm:hidden w-full flex-shrink-0 bg-[#0c0c0e]/95 backdrop-blur-md border-t border-slate-900 z-50">
-        <div className="max-w-md mx-auto">
-          <NeonMusicPlayer playLoseTrack={playLoseTrack} isGameStarted={isGameStarted} />
-        </div>
       </div>
 
       {/* Noise Texture */}
