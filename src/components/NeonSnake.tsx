@@ -157,8 +157,20 @@ export default function NeonSnake({ onGameOver, onReset, onStart }: Props) {
   useEffect(() => { scoreR.current    = score; },       [score]);
   useEffect(() => { goR.current       = gameOver; },    [gameOver]);
   useEffect(() => { startedR.current  = gameStarted; }, [gameStarted]);
-  useEffect(() => { pausedR.current   = isPaused; },    [isPaused]);
   useEffect(() => { levelIdxR.current = levelIdx; },    [levelIdx]);
+
+  // Prevenir recarga accidental en medio de una partida
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (gameStarted && !gameOver && !isPaused) {
+        e.preventDefault();
+        e.returnValue = ''; // Necesario para Chrome
+        return '';
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [gameStarted, gameOver, isPaused]);
 
   // ── Canvas
   const canvasRef = useRef<HTMLCanvasElement>(null);
