@@ -19,20 +19,23 @@ export default function App() {
 
   useEffect(() => {
     const loadRanking = async () => {
-      // Use the hardcoded SheetDB URL since .env ignores prevent it from reaching Cloud Build
-      const sheetUrl = "https://sheetdb.io/api/v1/6gn8xetirbn1d" || import.meta.env.VITE_SHEETDB_URL;
+      // Use the Apps Script URL
+      const sheetUrl = "https://script.google.com/macros/s/AKfycbwk6I3OvEN4GL1zjBcDvarlN_LVGrKWHXYbFVIOgXOOC1_Us1gEnT0dHIEiEkZLApuV/exec";
       setIsLoadingRanking(true);
       
       if (sheetUrl) {
         try {
-          const res = await fetch(sheetUrl, { cache: 'no-store' });
+          // Send GET request with 'juego' parameter to specify the tab
+          const res = await fetch(`${sheetUrl}?juego=serpiente`, { cache: 'no-store' });
           if (res.ok) {
             const data: any[] = await res.json();
+            // Map the Apps script standard output {nombre, puntos, fecha, (optional extras)}
             const parsed: ScoreEntry[] = data.map(row => ({
-              name: String(row.name || 'ANON'),
-              score: parseInt(row.score, 10) || 0,
-              difficulty: String(row.difficulty || ''),
-              date: String(row.date || '')
+              name: String(row.nombre || 'ANON'),
+              score: parseInt(row.puntos, 10) || 0,
+              // Note: the new Apps script doesn't natively store difficulty but we mapped it into name before, or just empty
+              difficulty: '',
+              date: String(row.fecha || '')
             }));
             const sorted = parsed.sort((a, b) => b.score - a.score).slice(0, 10);
             setRanking(sorted);
@@ -40,7 +43,7 @@ export default function App() {
             return;
           }
         } catch (error) {
-          console.error("Fallo conectando a SheetDB, usando respaldo local:", error);
+          console.error("Fallo conectando a Apps Script, usando respaldo local:", error);
         }
       }
       

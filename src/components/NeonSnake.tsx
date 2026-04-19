@@ -500,23 +500,28 @@ export default function NeonSnake({ onGameOver, onReset, onStart }: Props) {
     if (!playerName.trim() || isSaving) return;
     
     setIsSaving(true);
-    const entry = { name: playerName.trim(), score, difficulty: lv.name, date: new Date().toLocaleDateString() };
+    // Append difficulty string to name because the Apps Script only saves 3 columns natively
+    const entryData = {
+      juego: 'serpiente',
+      nombre: String(playerName.trim() + (lv.name ? ` [${lv.name}]` : '')).substring(0, 25),
+      puntos: score
+    };
     
-    // Save to SheetDB if URL exists (hardcoded for Cloud Build compatibility)
-    const sheetUrl = "https://sheetdb.io/api/v1/6gn8xetirbn1d" || import.meta.env.VITE_SHEETDB_URL;
+    // Save to Apps Script API
+    const sheetUrl = "https://script.google.com/macros/s/AKfycbwk6I3OvEN4GL1zjBcDvarlN_LVGrKWHXYbFVIOgXOOC1_Us1gEnT0dHIEiEkZLApuV/exec";
     if (sheetUrl) {
       try {
         await fetch(sheetUrl, {
           method: 'POST',
-          headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
-          body: JSON.stringify({ data: [entry] })
+          body: JSON.stringify(entryData)
         });
       } catch (err) {
-        console.error('Error saving to SheetDB:', err);
+        console.error('Error saving to Apps Script:', err);
       }
     }
 
     // Save to localStorage as well (fallback & immediate update)
+    const entry = { name: entryData.nombre, score, difficulty: '', date: new Date().toLocaleDateString() };
     const prev = JSON.parse(localStorage.getItem('ritmo_neon_ranking') || '[]') as ScoreEntry[];
     const next = [...prev, entry].sort((a, b) => b.score - a.score).slice(0, 10);
     localStorage.setItem('ritmo_neon_ranking', JSON.stringify(next));
