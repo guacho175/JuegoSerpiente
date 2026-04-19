@@ -490,8 +490,8 @@ export default function NeonSnake({ onGameOver, onReset, onStart }: Props) {
     setIsSaving(true);
     const entry = { name: playerName.trim(), score, difficulty: lv.name, date: new Date().toLocaleDateString() };
     
-    // Save to SheetDB if URL exists
-    const sheetUrl = import.meta.env.VITE_SHEETDB_URL;
+    // Save to SheetDB if URL exists (hardcoded for Cloud Build compatibility)
+    const sheetUrl = "https://sheetdb.io/api/v1/6gn8xetirbn1d" || import.meta.env.VITE_SHEETDB_URL;
     if (sheetUrl) {
       try {
         await fetch(sheetUrl, {

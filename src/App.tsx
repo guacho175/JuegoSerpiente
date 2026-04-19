@@ -19,7 +19,8 @@ export default function App() {
 
   useEffect(() => {
     const loadRanking = async () => {
-      const sheetUrl = import.meta.env.VITE_SHEETDB_URL;
+      // Use the hardcoded SheetDB URL since .env ignores prevent it from reaching Cloud Build
+      const sheetUrl = "https://sheetdb.io/api/v1/6gn8xetirbn1d" || import.meta.env.VITE_SHEETDB_URL;
       setIsLoadingRanking(true);
       
       if (sheetUrl) {
